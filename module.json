@@ -1,0 +1,22 @@
+{
+  "name": "dungeon-tilesets",
+  "title": "The Dungeonator - A Dungeon Tileset Generator",
+  "description": "<p>A module prototype developed for the D20 day hackathon.</p>",
+  "version": "0.1.0",
+  "minimumCoreVersion": "0.7.0",
+  "compatibleCoreVersion": "0.7.9",
+  "authors": [
+    {
+    	"name": "Atropos"
+    },
+    {
+    	"name": "cswendrowski"
+    }
+  ],
+  "esmodules": [
+    "scripts/dungeon-tilesets.mjs"
+  ],
+  "styles":  [
+    "styles/dungeon-tilesets.css"
+  ]
+}
