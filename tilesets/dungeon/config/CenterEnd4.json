@@ -349,9 +349,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "er5Z2NQI4ELBD5k1",
@@ -364,9 +364,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     }
   ],
   "edges": {
