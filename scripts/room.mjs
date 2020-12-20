@@ -74,18 +74,80 @@ export default class Room {
    * @returns {RoomData}
    */
   rotate(direction) {
-    // math here
+    let rotatedData = duplicate(this.data);
+
+    // We are north by default
+    if (directon == "n") return rotatedData;
+
+    if (direction == "e") {
+      // Edges
+      rotatedData.edges.n = this.data.edges.w;
+      rotatedData.edges.e = this.data.edges.n;
+      rotatedData.edges.s = this.data.edges.e;
+      rotatedData.edges.w = this.data.edges.s;
+
+      // Walls
+      
+      // TODO: rotato potato
+      //rotatedData.walls = this.rotateWallClockwise(rotatedData.walls);
+    }
+
+    else if (direction == "s") {
+      rotatedData.edges.n = this.data.edges.s;
+      rotatedData.edges.e = this.data.edges.w;
+      rotatedData.edges.s = this.data.edges.n;
+      rotatedData.edges.w = this.data.edges.e;
+    }
+
+    else if (direction == "w") {
+      rotatedData.edges.n = this.data.edges.e;
+      rotatedData.edges.e = this.data.edges.s;
+      rotatedData.edges.s = this.data.edges.w;
+      rotatedData.edges.w = this.data.edges.n;
+    }
+
     return rotatedData
   }
 
+  // X, Y -> 1800 (Max Y) - Y, X
+  rotatePointClockwise(x, y) {
+    // TODO: Don't hardcode the max
+    return { x: 1800 - y, y: x };
+  }
+
   /**
+   * TODO: Remove this probably
    * @param {boolean} x
    * @param {boolean} y
    * @returns {RoomData}
    */
   flip(x, y) {
-    // math here
-    return flippedData
+    if (x) return this.flipHorizontal();
+    if (y) return this.flipVertical();
+  }
+
+  /**
+   * @returns {RoomData}
+   */
+  flipHorizontal() {
+    let flippedData = duplicate(this.data);
+
+    flippedData.edges.e = this.data.edges.w;
+    flippedData.edges.w = this.data.edges.e;
+
+    return flippedData;
+  }
+
+  /**
+   * @returns {RoomData}
+   */
+  flipVertical() {
+    let flippedData = duplicate(this.data);
+
+    flippedData.edges.n = this.data.edges.s;
+    flippedData.edges.s = this.data.edges.n;
+
+    return flippedData;
   }
 
   /**
