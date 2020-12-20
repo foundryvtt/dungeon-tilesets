@@ -11,7 +11,8 @@ async function test() {
   await tileset.initialize();
   const generator = new Generator(tileset);
   const configuration = generator.generate();
-  return generator.commit(configuration);
+  // return generator.commit(configuration);
+  return generator;
 }
 
 /**

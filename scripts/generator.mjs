@@ -64,10 +64,9 @@ export default class Generator {
     };
 
     // Generate tile configuration
-    const configuration = this._generate(config);
-    config.tiles = configuration.tiles;
-    config.walls = configuration.walls;
-    return config;
+    this._generate(config);
+    // config.tiles = configuration.tiles;
+    // config.walls = configuration.walls;
   }
 
   /* -------------------------------------------- */
@@ -79,15 +78,20 @@ export default class Generator {
    * @param {number} [options.entrances=1]
    */
   _configure({size="small", entrances=1}={}) {
+
+    // Determine the layout size
     this.size = size;
     this.nRooms = {
       small: 3,
       medium: 5,
       large: 7
     }[size];
-    this.placements = [];
+
+    // Generate the placeholder layout
     this.attempts = 0;
-    this.layout = Array.fromRange(this.nRooms).map(r => []);
+    this.placements = [];
+    const nr = Array.fromRange(this.nRooms);
+    this.layout = nr.map(r => nr.map(i => null));
   }
 
   /* -------------------------------------------- */
@@ -122,7 +126,8 @@ export default class Generator {
       }
     }
     if ( !isComplete ) {
-      throw new Error(`We failed to generate a valid layout after ${max} attempts`);
+      // throw new Error(`We failed to generate a valid layout after ${max} attempts`);
+      console.error(`We failed to generate a valid layout after ${max} attempts`);
     }
   }
 
@@ -300,12 +305,37 @@ export default class Generator {
 
   /* -------------------------------------------- */
 
+  /**
+   * Determine the next tile location to try and place
+   * @returns {number[]}
+   * @private
+   */
   _getNextLocation() {
+
+    // Case 1: a brand new layout
     if ( !this.placements.length ) {
       const i1 = Math.floor(this.nRooms / 2);
       return [i1, i1];
     }
+
+    // Case 2: adjacent to the last placement
     const last = this.placements[this.placements.length - 1];
-    return [1,1];
+    const adjacent = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for ( let a of adjacent ) {
+      let next = [last[0]+a[0], last[1]+a[1]];
+      if ( !this.placements.some(p => p.equals(next) ) ) return next;
+    }
+
+    // Case 3: pick a random position which is not yet placed
+    const spaces = Array.from(this.size);
+    const remaining = [];
+    for ( let x of spaces ) {
+      for ( let y of spaces ) {
+        let next = [x, y];
+        if ( !this.placements.some(p => p.equals(next) ) ) remaining.push(next);
+      }
+    }
+    if ( !remaining.length ) throw new Error("Failed to determine the next room location");
+    return remaining[Math.floor(Math.random() * remaining.length)];
   }
 }
