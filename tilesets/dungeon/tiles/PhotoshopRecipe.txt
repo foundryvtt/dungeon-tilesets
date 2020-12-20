@@ -1,9 +1,9 @@
 Tile Recipe
-
-1. Create wall outline, inset 1/8 (25px)
-2. Draw wall brushes
-3. Layers
-	- Black (25px contract, 25px feather, delete x2)
-	- Foreground (10px feather, delete x5, Pattern Overlay)
-	- Walls Brush
-	- Wall Shadow (Drop Shadow)
+=================
+1. Create wall outline, solid black, inset 1/8 grid (25px)
+2. Draw walls using Stone Wall 2 brush at 100px
+3. Structure Layer Group
+   - Black (25px contract > 25px feather > delete x2)
+   - Foreground (10px feather > delete x5 > apply pattern overlay)
+   - Walls Layer
+   - Wall Shadow (apply drop shadow 50%/25px at 75% alpha)
