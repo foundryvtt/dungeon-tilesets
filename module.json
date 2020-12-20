@@ -18,5 +18,14 @@
   ],
   "styles":  [
     "styles/dungeon-tilesets.css"
+  ],
+  "packs": [
+    {
+      "name": "dungeon-tilesets-edge-markers",
+      "label": "Dungeon Tilesets Edge Markers",
+      "path": "./packs/dungeon-tilesets-edge-markers.db",
+      "system": "archmage",
+      "entity": "Actor"
+    }
   ]
 }
