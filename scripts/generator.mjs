@@ -355,8 +355,8 @@ export default class Generator {
     // Get the canvas dimensions
     const s = this._getCanvasSize(this.size);
     const config = {
-      width: s,
-      height: s,
+      width: 1800,
+      height: 1800,
       size: this.gridSize,
       padding: 0,
       backgroundColor: "#000000",
@@ -370,10 +370,10 @@ export default class Generator {
         if ( d === null ) continue;
         const s = this.roomSize * this.gridSize;
         const tileData = {
-          x: x * s,
-          y: y * s,
-          width: s,
-          height: s,
+          x: 0,
+          y: 0,
+          width: 1800,
+          height: 1800,
           rotation: d.rotation,
           mirrorX: d.mirrorX,
           mirrorY: d.mirrorY,
@@ -381,6 +381,20 @@ export default class Generator {
           locked: true
         };
         config.tiles.push(tileData);
+
+        // I'm sure there is a fancier way to do this
+        if (d.rotation == "0") {
+          config.walls = d.walls.n;
+        }
+        else if (d.rotation == "90") {
+          config.walls = d.walls.e;
+        }
+        else if (d.rotation == "180") {
+          config.walls = d.walls.s;
+        }
+        else if (d.rotation == "270") {
+          config.walls = d.walls.w;
+        }
       }
     }
 
