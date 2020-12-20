@@ -604,12 +604,6 @@
       false
     ],
     "w": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
       {
         "type": "hallway"
       },
@@ -618,7 +612,13 @@
       },
       {
         "type": "hallway"
-      }
+      },
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   }
 }

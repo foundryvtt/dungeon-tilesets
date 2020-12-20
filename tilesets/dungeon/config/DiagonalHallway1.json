@@ -375,23 +375,6 @@
       }
     ],
     "s": [
-      {
-        "type": "hallway"
-      },
-      {
-        "type": "hallway"
-      },
-      {
-        "type": "hallway"
-      },
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
-    ],
-    "w": [
       false,
       false,
       false,
@@ -407,6 +390,23 @@
       {
         "type": "hallway"
       }
+    ],
+    "w": [
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   }
 }

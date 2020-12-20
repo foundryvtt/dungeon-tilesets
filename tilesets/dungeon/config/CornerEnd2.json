@@ -70,8 +70,7 @@
       "move": 1,
       "sense": 1,
       "door": 0,
-      "ds": 0,
-      "locked": false
+      "ds": 0
     },
     {
       "_id": "GY8kzDDah658JE2h",
@@ -283,12 +282,6 @@
       false
     ],
     "w": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
       {
         "type": "hallway"
       },
@@ -297,7 +290,13 @@
       },
       {
         "type": "hallway"
-      }
+      },
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   }
 }

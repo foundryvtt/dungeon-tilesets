@@ -41,9 +41,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "eX6XokJulnSqk642",
@@ -112,9 +112,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "113YgAIgBOtwxbYN",
@@ -295,9 +295,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "9q5U42LJR804qxYj",
@@ -366,9 +366,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "CHshB3LRV3G54v60",

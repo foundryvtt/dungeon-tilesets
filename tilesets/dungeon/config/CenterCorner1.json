@@ -97,9 +97,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "9L2TEWPqEtDFC6Mh",
@@ -280,9 +280,9 @@
       ],
       "move": 1,
       "sense": 1,
+      "dir": 0,
       "door": 1,
-      "ds": 0,
-      "dir": 0
+      "ds": 0
     },
     {
       "_id": "xQARAKsLVDtjaFem",
@@ -385,6 +385,12 @@
       }
     ],
     "s": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
       {
         "type": "hallway"
       },
@@ -393,13 +399,7 @@
       },
       {
         "type": "hallway"
-      },
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      }
     ],
     "w": [
       false,
