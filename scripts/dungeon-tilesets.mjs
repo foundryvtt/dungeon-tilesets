@@ -6,11 +6,12 @@ import DungeonTilesetsConfig from "./config.mjs";
 /**
  * Test generation
  */
-function test() {
+async function test() {
   const tileset = new Tileset("dungeon");
+  await tileset.initialize();
   const generator = new Generator(tileset);
   const configuration = generator.generate();
-  generator.commit(configuration);
+  return generator.commit(configuration);
 }
 
 /**
