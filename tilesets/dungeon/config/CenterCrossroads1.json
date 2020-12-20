@@ -1,49 +1,188 @@
 {
-	"name": "CenterCrossroads1",
-	"size": 9,
-	"walls": [
-	  [0,3,3,3],
-	  [3,0,3,3],
-	  [6,0,6,3],
-	  [6,3,9,3],
-	  [0,6,3,6],
-	  [3,6,3,9],
-	  [6,6,6,9],
-	  [6,6,9,6]
-	],
-	"edges": [
-	  false,
-	  false,
-	  false,
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  false,
-	  false,
-	  false,
-	  false,
-	  false,
-	  false,
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  false,
-	  false,
-	  false,
-	  false,
-	  false,
-	  false,
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  false,
-	  false,
-	  false,
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  {"type": "interior"},
-	  false,
-	  false,
-	  false
-	]
+  "name": "CenterCrossroads1",
+  "size": 9,
+  "walls": [
+    {
+      "_id": "NRYhk8bRbc4ZkWxv",
+      "flags": {},
+      "c": [
+        600,
+        0,
+        600,
+        600
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "H8FDyPzTr29B7efE",
+      "flags": {},
+      "c": [
+        600,
+        600,
+        0,
+        600
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "wIrkgAaJrvupZQhD",
+      "flags": {},
+      "c": [
+        1200,
+        0,
+        1200,
+        600
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "TkKO7fGR487Nl3d4",
+      "flags": {},
+      "c": [
+        1200,
+        600,
+        1800,
+        600
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "rDj3p9R6I9dxBAmP",
+      "flags": {},
+      "c": [
+        1800,
+        1200,
+        1200,
+        1200
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "TwPadCRmcvnKPCSv",
+      "flags": {},
+      "c": [
+        1200,
+        1200,
+        1200,
+        1800
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "8HTglcfhC22KKd7L",
+      "flags": {},
+      "c": [
+        600,
+        1800,
+        600,
+        1200
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    },
+    {
+      "_id": "rmPvOlr8wu6vuyew",
+      "flags": {},
+      "c": [
+        600,
+        1200,
+        0,
+        1200
+      ],
+      "move": 1,
+      "sense": 1,
+      "door": 0,
+      "ds": 0
+    }
+  ],
+  "edges": {
+    "n": [
+      false,
+      false,
+      false,
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      false,
+      false,
+      false
+    ],
+    "e": [
+      false,
+      false,
+      false,
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      false,
+      false,
+      false
+    ],
+    "s": [
+      false,
+      false,
+      false,
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      false,
+      false,
+      false
+    ],
+    "w": [
+      false,
+      false,
+      false,
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      {
+        "type": "hallway"
+      },
+      false,
+      false,
+      false
+    ]
+  }
 }
