@@ -11,7 +11,8 @@ async function test() {
   await tileset.initialize();
   const generator = new Generator(tileset);
   const configuration = generator.generate();
-  return generator.commit(configuration);
+  await generator.commit(configuration);
+  return generator;
 }
 
 /**
@@ -28,19 +29,16 @@ Hooks.on("init", function() {
   console.log("Dungeon Tilesets Initialized");
 });
 
-
+/**
+ * Extend the scene control buttons to provide a dungeon generation configuration menu.
+ */
 Hooks.on("getSceneControlButtons", function(controls) {
-  let tileControls = controls.find(x => x.name == "tiles");
-  
+  let tileControls = controls.find(x => x.name === "tiles");
   tileControls.tools.push({
     icon: "fas fa-th",
     name: "dungeon-generator",
-    title: "Dungeonator"
+    title: "Dungeonator",
+    button: true,
+    onClick: () => new DungeonTilesetsConfig().render(true)
   });
-});
-
-Hooks.on("renderSceneControls", function (sceneControls) {
-  if (sceneControls.activeTool == "dungeon-generator") {
-    new DungeonTilesetsConfig().render(true);
-  }
 });

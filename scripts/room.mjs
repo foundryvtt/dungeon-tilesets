@@ -35,6 +35,12 @@ export default class Room {
     this.data = roomData;
   }
 
+  /**
+   * The ordered set of cardinal directions a room can be oriented towards
+   * @type {[string, string, string, string]}
+   */
+  static DIRECTIONS = ["n", "e", "s", "w"];
+
   /* -------------------------------------------- */
   /*  Room Properties                             */
   /* -------------------------------------------- */
@@ -74,40 +80,39 @@ export default class Room {
    * @returns {RoomData}
    */
   rotate(direction) {
-    let rotatedData = duplicate(this.data);
-
-    // We are north by default
-    if (directon == "n") return rotatedData;
-
-    if (direction == "e") {
-      // Edges
-      rotatedData.edges.n = this.data.edges.w;
-      rotatedData.edges.e = this.data.edges.n;
-      rotatedData.edges.s = this.data.edges.e;
-      rotatedData.edges.w = this.data.edges.s;
-
-      // Walls
-      
-      // TODO: rotato potato
-      //rotatedData.walls = this.rotateWallClockwise(rotatedData.walls);
-    }
-
-    else if (direction == "s") {
-      rotatedData.edges.n = this.data.edges.s;
-      rotatedData.edges.e = this.data.edges.w;
-      rotatedData.edges.s = this.data.edges.n;
-      rotatedData.edges.w = this.data.edges.e;
-    }
-
-    else if (direction == "w") {
-      rotatedData.edges.n = this.data.edges.e;
-      rotatedData.edges.e = this.data.edges.s;
-      rotatedData.edges.s = this.data.edges.w;
-      rotatedData.edges.w = this.data.edges.n;
-    }
-
-    return rotatedData
+    let rotated = duplicate(this.data);
+    rotated.edges = this._rotateEdges(direction, rotated.edges);
+    // rotated.walls = this._rotateWalls();
+    rotated.rotation = {
+      n: 0,
+      e: 90,
+      s: 180,
+      w: 270
+    }[direction];
+    return rotated;
   }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Rotate the edges of the room data to form a rotated permutation
+   * @param {string} direction          The desired direction of rotation
+   * @param {EdgeConstraints} edges     The existing edge constraints
+   * @returns {EdgeConstraints}         The rotated edge constraints
+   * @private
+   */
+  _rotateEdges(direction, edges) {
+    const directions = Room.DIRECTIONS;
+    const rotations = directions.indexOf(direction);
+    const rotated = {};
+    for ( let [i, d] of directions.entries() ) {
+      const x = (i + rotations) % 4;
+      rotated[d] = edges[directions[x]];
+    }
+    return rotated;
+  }
+
+  /* -------------------------------------------- */
 
   // X, Y -> 1800 (Max Y) - Y, X
   rotatePointClockwise(x, y) {
@@ -115,56 +120,85 @@ export default class Room {
     return { x: 1800 - y, y: x };
   }
 
+  /* -------------------------------------------- */
+
   /**
-   * TODO: Remove this probably
-   * @param {boolean} x
-   * @param {boolean} y
-   * @returns {RoomData}
+   * Generate a permutation of the Room Data by flipping its data horizontally
+   * @param {RoomData} data       Original un-flipped room data
+   * @returns {RoomData}          Horizontally flipped room data
    */
-  flip(x, y) {
-    if (x) return this.flipHorizontal();
-    if (y) return this.flipVertical();
+  flipHorizontal(data) {
+    let edges = duplicate(data.edges);
+    let flipped = duplicate(data);
+    flipped.edges.n = edges.n.reverse();
+    flipped.edges.e = edges.w;
+    flipped.edges.s = edges.s.reverse();
+    flipped.edges.w = edges.e;
+    flipped.mirrorX = true;
+    return flipped;
   }
 
+  /* -------------------------------------------- */
+
   /**
-   * @returns {RoomData}
+   * Generate a permutation of the Room Data by flipping its data vertically
+   * @param {RoomData} data       Original un-flipped room data
+   * @returns {RoomData}          Vertically flipped room data
    */
-  flipHorizontal() {
-    let flippedData = duplicate(this.data);
-
-    flippedData.edges.e = this.data.edges.w;
-    flippedData.edges.w = this.data.edges.e;
-
-    return flippedData;
+  flipVertical(data) {
+    let edges = duplicate(data.edges);
+    let flipped = duplicate(data);
+    flipped.edges.n = edges.s;
+    flipped.edges.e = edges.e.reverse();
+    flipped.edges.s = edges.n;
+    flipped.edges.w = edges.w.reverse();
+    flipped.mirrorY = true;
+    return flipped;
   }
 
-  /**
-   * @returns {RoomData}
-   */
-  flipVertical() {
-    let flippedData = duplicate(this.data);
-
-    flippedData.edges.n = this.data.edges.s;
-    flippedData.edges.s = this.data.edges.n;
-
-    return flippedData;
-  }
+  /* -------------------------------------------- */
 
   /**
+   * Prepare an array of 12 permutations which can be supported for each Room
    * @returns {RoomData[]}
    */
   getPermutations() {
-    // 12 permutations per room
-    // TODO - for now, no permutations
-    return [duplicate(this.data)];
+
+    // Generate all 4 rotations
+    const rotations = Room.DIRECTIONS.map(d => {
+      const p = this.rotate(d);
+      p.img = this.img;
+      p.mirrorX = false;
+      p.mirrorY = false;
+      return p;
+    });
+
+    // Generate horizontal and vertical flips
+    const horizontal = rotations.map(d => this.flipHorizontal(d));
+    const vertical = rotations.map(d => this.flipVertical(d));
+
+    // Return all permutations
+    return rotations.concat(horizontal).concat(vertical);
   }
 
-  /**
-   * @param {string} roomName
-   * @returns {Promise<Room>}
-   */
-  static async fromJSON(roomName) {
-    return new this(roomData);
-  }
+  /* -------------------------------------------- */
 
+  static getBlankPermutation() {
+    const edges = Array.fromRange(9).map(n => false);
+    return {
+      name: "Blank",
+      size: 9,
+      walls: [],
+      edges: {
+        n: edges,
+        e: edges,
+        s: edges,
+        w: edges
+      },
+      rotation: 0,
+      img: null,
+      mirrorX: false,
+      mirrorY: false
+    }
+  }
 }

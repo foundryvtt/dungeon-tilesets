@@ -1,3 +1,5 @@
+import Room from "./room.mjs";
+
 /**
  * A controller to handle the
  * @param {Tileset} tileset
@@ -54,20 +56,11 @@ export default class Generator {
     // Configure the generator
     this._configure(options);
 
-    // Get the canvas dimensions
-    const s = this._getCanvasSize(this.size);
-    const config = {
-      width: s,
-      height: s,
-      size: this.gridSize,
-      padding: 0
-    };
+    // Generate room configuration
+    this._generate();
 
-    // Generate tile configuration
-    const configuration = this._generate(config);
-    config.tiles = configuration.tiles;
-    config.walls = configuration.walls;
-    return config;
+    // Export scene data
+    return this._export();
   }
 
   /* -------------------------------------------- */
@@ -79,15 +72,20 @@ export default class Generator {
    * @param {number} [options.entrances=1]
    */
   _configure({size="small", entrances=1}={}) {
+
+    // Determine the layout size
     this.size = size;
     this.nRooms = {
       small: 3,
       medium: 5,
       large: 7
     }[size];
-    this.placements = [];
+
+    // Generate the placeholder layout
     this.attempts = 0;
-    this.layout = Array.fromRange(this.nRooms).map(r => []);
+    this.placements = [];
+    const nr = Array.fromRange(this.nRooms);
+    this.layout = nr.map(r => nr.map(i => null));
   }
 
   /* -------------------------------------------- */
@@ -117,12 +115,12 @@ export default class Generator {
         this._try();
         isComplete = this.placements.length === this.roomSize;
       } catch(err) {
-        console.debug(err);
         this._backtrack();
       }
     }
     if ( !isComplete ) {
-      throw new Error(`We failed to generate a valid layout after ${max} attempts`);
+      // throw new Error(`We failed to generate a valid layout after ${max} attempts`);
+      console.error(`We failed to generate a valid layout after ${max} attempts`);
     }
   }
 
@@ -194,8 +192,8 @@ export default class Generator {
   getAdjacent(x, y) {
     return {
       n: y === 0 ? false : (this.layout[x][y-1] ?? null),
-      e: x === (this.size-1) ? false : (this.layout[x][y-1] ?? null),
-      s: y === (this.size-1) ? false : (this.layout[x][y+1] ?? null),
+      e: x === (this.nRooms-1) ? false : (this.layout[x+1][y] ?? null),
+      s: y === (this.nRooms-1) ? false : (this.layout[x][y+1] ?? null),
       w: x === 0 ? false : (this.layout[x-1][y] ?? null)
     };
   }
@@ -239,8 +237,8 @@ export default class Generator {
     if ( adjacent === null ) return Array.fromRange(this.roomSize).map(n => null);
 
     // Case 3: adjacent is interior data with known edges
-    const idx = { n: 2, e: 3, s: 0, w: 1 }[direction]; // reverse the direction
-    const edges = adjacent.edges[idx];
+    const idx = { n: "s", e: "w", s: "n", w: "e" }[direction]; // reverse the direction
+    const edges = duplicate(adjacent.edges[idx]).reverse();
     return edges ?? Array.fromRange(this.roomSize).map(n => null);
   }
 
@@ -255,12 +253,21 @@ export default class Generator {
    */
   _getMatchingPermutations(rooms, constraints) {
     const matches = [];
+
+    // Match room permutations
     for ( let r of rooms ) {
       const permutations = r.getPermutations();
       for ( let p of permutations ) {
         const match = this._testPermutation(p, constraints);
         if ( match ) matches.push(p);
       }
+    }
+
+    // Allow for a blank tile
+    if ( !matches.length ) {
+      const blank = Room.getBlankPermutation();
+      const match = this._testPermutation(blank, constraints);
+      if ( match ) matches.push(blank);
     }
     return matches;
   }
@@ -300,12 +307,84 @@ export default class Generator {
 
   /* -------------------------------------------- */
 
+  /**
+   * Determine the next tile location to try and place
+   * @returns {number[]}
+   * @private
+   */
   _getNextLocation() {
+
+    // Case 1: a brand new layout
     if ( !this.placements.length ) {
       const i1 = Math.floor(this.nRooms / 2);
       return [i1, i1];
     }
+
+    // Case 2: adjacent to the last placement
     const last = this.placements[this.placements.length - 1];
-    return [1,1];
+    const adjacent = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for ( let a of adjacent ) {
+      let next = [last[0]+a[0], last[1]+a[1]];
+      if ( !next[0].between(0, this.nRooms-1) ) continue;
+      if ( !next[1].between(0, this.nRooms-1) ) continue;
+      if ( !this.placements.some(p => p.equals(next)) ) return next;
+    }
+
+    // Case 3: pick a random position which is not yet placed
+    const spaces = Array.from(this.nRooms);
+    const remaining = [];
+    for ( let x of spaces ) {
+      for ( let y of spaces ) {
+        let next = [x, y];
+        if ( !this.placements.some(p => p.equals(next)) ) remaining.push(next);
+      }
+    }
+    if ( !remaining.length ) throw new Error("Failed to determine the next room location");
+    return remaining[Math.floor(Math.random() * remaining.length)];
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Export the generated dungeon layout to Scene data
+   * @returns {{padding: number, size: number, width: number, height: number}}
+   * @private
+   */
+  _export() {
+
+    // Get the canvas dimensions
+    const s = this._getCanvasSize(this.size);
+    const config = {
+      width: s,
+      height: s,
+      size: this.gridSize,
+      padding: 0,
+      backgroundColor: "#000000",
+      tiles: [],
+      walls: []
+    };
+
+    // Get tile configuration
+    for ( let [x, col] of this.layout.entries() ) {
+      for ( let [y, d] of col.entries() ) {
+        if ( d === null ) continue;
+        const s = this.roomSize * this.gridSize;
+        const tileData = {
+          x: x * s,
+          y: y * s,
+          width: s,
+          height: s,
+          rotation: d.rotation,
+          mirrorX: d.mirrorX,
+          mirrorY: d.mirrorY,
+          img: d.img,
+          locked: true
+        };
+        config.tiles.push(tileData);
+      }
+    }
+
+    // Return the exported configuration
+    return config;
   }
 }

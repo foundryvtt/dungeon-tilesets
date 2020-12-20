@@ -18,6 +18,8 @@ export default class Tileset {
     return getRoute(`modules/dungeon-tilesets/tilesets/${this.name}`);
   }
 
+  /* -------------------------------------------- */
+
   /**
    * Initialize the Tileset, loading all available Rooms
    * @returns {Promise<void>}
@@ -26,12 +28,8 @@ export default class Tileset {
     const contents = await FilePicker.browse("data", `${this.path}/config`);
     const configs = contents.files.filter(f => /.json$/.test(f));
     for ( let c of configs ) {
-
-      // Load the room data and construct the instance
       const roomData = await fetch(c).then(r => r.json());
       const room = new Room(roomData, this);
-
-      // Validate that a source image exists for the room
       const exists = await srcExists(room.img);
       if ( !exists ) {
         console.error(`The expected source image ${room.img} does not exist for Room ${room.name}`);
