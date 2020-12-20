@@ -26,3 +26,20 @@ Hooks.on("init", function() {
   };
   console.log("Dungeon Tilesets Initialized");
 });
+
+
+Hooks.on("getSceneControlButtons", function(controls) {
+  let tileControls = controls.find(x => x.name == "tiles");
+  
+  tileControls.tools.push({
+    icon: "fas fa-th",
+    name: "dungeon-generator",
+    title: "Dungeonator"
+  });
+});
+
+Hooks.on("renderSceneControls", function (sceneControls) {
+  if (sceneControls.activeTool == "dungeon-generator") {
+    new DungeonTilesetsConfig().render(true);
+  }
+});

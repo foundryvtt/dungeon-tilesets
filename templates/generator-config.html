@@ -1,0 +1,34 @@
+<form class="{{cssClass}} generator-config" autocomplete="off">
+
+    <!-- HEADER -->
+    <header class="application-header">
+        The Dungeonator - A Dungeon Tileset Generator
+    </header>
+
+    <section class="application-body">
+        <div class="form-group">
+            <label>Tileset</label>
+            <div class="form-fields">
+                <select name="tileset">
+                    <option value="dungeon" selected="">Dungeon</option>
+                </select>  
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Dungeon Size</label>
+            <div class="form-fields">
+                <select name="size">
+                    <option value="size" selected="">Small</option>
+                </select>  
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Number of Entrances / Exits</label>
+            <input type="number" name="entrances" value="{{entrances}}" data-dtype="Number" placeholder="1" disabled />
+        </div>
+    </section>
+
+    <button type="submit" name="submit">
+        <i class="fas fa-save"></i> Generate
+    </button>
+</form>
