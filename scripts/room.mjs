@@ -130,9 +130,7 @@ export default class Room {
   flipHorizontal(data) {
     let edges = duplicate(data.edges);
     let flipped = duplicate(data);
-    flipped.edges.n = edges.n.reverse();
     flipped.edges.e = edges.w;
-    flipped.edges.s = edges.s.reverse();
     flipped.edges.w = edges.e;
     flipped.mirrorX = true;
     return flipped;
@@ -149,9 +147,7 @@ export default class Room {
     let edges = duplicate(data.edges);
     let flipped = duplicate(data);
     flipped.edges.n = edges.s;
-    flipped.edges.e = edges.e.reverse();
     flipped.edges.s = edges.n;
-    flipped.edges.w = edges.w.reverse();
     flipped.mirrorY = true;
     return flipped;
   }

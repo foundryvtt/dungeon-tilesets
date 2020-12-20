@@ -238,7 +238,7 @@ export default class Generator {
 
     // Case 3: adjacent is interior data with known edges
     const idx = { n: "s", e: "w", s: "n", w: "e" }[direction]; // reverse the direction
-    const edges = duplicate(adjacent.edges[idx]).reverse();
+    const edges = duplicate(adjacent.edges[idx]);
     return edges ?? Array.fromRange(this.roomSize).map(n => null);
   }
 
