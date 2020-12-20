@@ -355,8 +355,8 @@ export default class Generator {
     // Get the canvas dimensions
     const s = this._getCanvasSize(this.size);
     const config = {
-      width: 1800,
-      height: 1800,
+      width: s,
+      height: s,
       size: this.gridSize,
       padding: 0,
       backgroundColor: "#000000",
@@ -370,10 +370,10 @@ export default class Generator {
         if ( d === null ) continue;
         const s = this.roomSize * this.gridSize;
         const tileData = {
-          x: 0,
-          y: 0,
-          width: 1800,
-          height: 1800,
+          x: x * s,
+          y: y * s,
+          width: s,
+          height: s,
           rotation: d.rotation,
           mirrorX: d.mirrorX,
           mirrorY: d.mirrorY,
