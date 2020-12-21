@@ -19,7 +19,7 @@ export default class Generator {
    * The maximum placement attempts which can be tried before a layout is declared invalid
    * @type {number}
    */
-  static MAX_ALLOWED_ATTEMPTS = 1000;
+  static MAX_ALLOWED_ATTEMPTS = 500;
 
   /* -------------------------------------------- */
 
@@ -82,10 +82,12 @@ export default class Generator {
     }[size];
 
     // Generate the placeholder layout
-    this.attempts = 0;
     this.placements = [];
     const nr = Array.fromRange(this.nRooms);
     this.layout = nr.map(r => nr.map(i => null));
+
+    // Internal progress trackers
+    this._attempts = 0;
   }
 
   /* -------------------------------------------- */
@@ -109,9 +111,10 @@ export default class Generator {
   _generate() {
     const max = Generator.MAX_ALLOWED_ATTEMPTS;
     let isComplete = false;
-    while ( !isComplete && (this.attempts < max) ) {
+    while ( !isComplete && (this._attempts < max) ) {
       try {
-        this.attempts++;
+        this.attemptsCurrent++;
+        this._attempts++;
         this._try();
         isComplete = this.placements.length === this.roomSize;
       } catch(err) {
@@ -139,9 +142,8 @@ export default class Generator {
     const constraints = this._getAdjacentConstraints(x, y);
 
     // Get candidate Rooms that can provide permutations
-    const rooms = this.tileset.findRooms({
-      minOpen: !this.placements.length ? 9 : undefined
-    });
+    const minOpen = !this.placements.length ? 9 : Object.values(constraints).flat().reduce((n, e) => (!!e ? n+1 : n), 0);
+    const rooms = this.tileset.findRooms({minOpen});
 
     // Get the permutations which satisfy the constraints
     const permutations = this._getMatchingPermutations(rooms, constraints);
@@ -169,6 +171,60 @@ export default class Generator {
     }
     const [x, y] = this.placements.pop();
     this.layout[x][y] = null;
+    this.attemptsCurrent = 0;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Provide sets which reflect the work-in-progress to fully populate the board with rooms
+   * @returns {{incomplete: Set<any>, completed: Set<any>, required: Set<any>}}
+   * @private
+   */
+  _getProgress() {
+
+    // Track completed and required
+    const completed = new Set();
+    const required = new Set();
+    const incomplete = new Set();
+
+    // Map adjacent positions
+    const adjacent = {
+      n: [0, -1],
+      e: [1, 0],
+      s: [0, 1],
+      w: [-1, 0]
+    }
+
+    // Iterate over all completed placements
+    for ( let [x0, y0] of this.placements ) {
+      const pos = [x0,y0].join(".")
+      completed.add(pos);
+      required.delete(pos);
+      const room = this.layout[x0][y0];
+      const openDirections = Room.getOpenDirections(room);
+      for ( let d of openDirections ) {
+        const o = adjacent[d];
+        let x1 = x0 + o[0];
+        let y1 = y0 + o[1];
+        const pos = [x1,y1].join(".");
+        if ( x1.between(0, this.nRooms-1) && y1.between(0, this.nRooms-1) && !completed.has(pos) ) {
+          required.add(pos);
+        }
+      }
+    }
+
+    // Record incomplete locations
+    const nr = Array.fromRange(this.nRooms);
+    for ( let x of nr ) {
+      for ( let y of nr ) {
+        const pos = [x,y].join(".");
+        if ( !completed.has(pos) ) incomplete.add(pos);
+      }
+    }
+
+    // Return position progress
+    return {completed, incomplete, required};
   }
 
   /* -------------------------------------------- */
@@ -320,27 +376,19 @@ export default class Generator {
       return [i1, i1];
     }
 
-    // Case 2: adjacent to the last placement
-    const last = this.placements[this.placements.length - 1];
-    const adjacent = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    for ( let a of adjacent ) {
-      let next = [last[0]+a[0], last[1]+a[1]];
-      if ( !next[0].between(0, this.nRooms-1) ) continue;
-      if ( !next[1].between(0, this.nRooms-1) ) continue;
-      if ( !this.placements.some(p => p.equals(next)) ) return next;
+    // Case 2: required adjacent positions
+    const progress = this._getProgress();
+    const required = Array.from(progress.required);
+    if ( required.length ) {
+      return required[Math.floor(Math.random() * required.length)].split(".").map(Number);
     }
 
     // Case 3: pick a random position which is not yet placed
-    const spaces = Array.from(this.nRooms);
-    const remaining = [];
-    for ( let x of spaces ) {
-      for ( let y of spaces ) {
-        let next = [x, y];
-        if ( !this.placements.some(p => p.equals(next)) ) remaining.push(next);
-      }
+    const incomplete = Array.from(progress.incomplete);
+    if ( incomplete.length ) {
+      return incomplete[Math.floor(Math.random() * incomplete.length)].split(".").map(Number);
     }
-    if ( !remaining.length ) throw new Error("Failed to determine the next room location");
-    return remaining[Math.floor(Math.random() * remaining.length)];
+    throw new Error("Failed to determine the next room location");
   }
 
   /* -------------------------------------------- */
@@ -367,7 +415,7 @@ export default class Generator {
     // Get tile configuration
     for ( let [x, col] of this.layout.entries() ) {
       for ( let [y, d] of col.entries() ) {
-        if ( d === null ) continue;
+        if ( !d?.img ) continue;
         const s = this.roomSize * this.gridSize;
         const tileData = {
           x: x * s,

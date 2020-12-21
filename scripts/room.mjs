@@ -73,23 +73,50 @@ export default class Room {
     }, 0);
   }
 
+  /**
+   * Does this Room have at least one central opening?
+   * @returns {boolean}
+   */
+  get hasCenterOpen() {
+    for ( let edges of Object.values(this.data.edges) ) {
+      const center = edges.slice(3,6);
+      if ( center.some(e => !!e) ) return true;
+    }
+  }
+
+  /**
+   * Does this Room have at least one corner opening?
+   * @returns {boolean}
+   */
+  get hasCornerOpen() {
+    for ( let edges of Object.values(this.data.edges) ) {
+      const c1 = edges.slice(0,3);
+      if ( c1.some(e => !!e) ) return true;
+      const c2 = edges.slice(6,9);
+      if ( c2.some(e => !!e) ) return true;
+    }
+  }
+
   /* -------------------------------------------- */
 
   /**
-   * @param {string} direction    n/s/e/w
-   * @returns {RoomData}
+   * Create a permutation of Room Data which is rotated and/or mirrored
+   * @param {string} direction          The cardinal direction to rotate
+   * @param {boolean} flipHorizontal    Whether to mirror horizontally
+   * @param {boolean} flipVertical      Whether to mirror vertically
+   * @returns {RoomData}                A permutation of Room Data
    */
-  rotate(direction) {
-    let rotated = duplicate(this.data);
-    rotated.edges = this._rotateEdges(direction, rotated.edges);
-    // rotated.walls = this._rotateWalls();
-    rotated.rotation = {
-      n: 0,
-      e: 90,
-      s: 180,
-      w: 270
-    }[direction];
-    return rotated;
+  transform(direction, flipHorizontal=false, flipVertical=false) {
+    const transformed = duplicate(this.data);
+    transformed.mirrorX = transformed.mirrorY = false;
+
+    // First apply any mirroring
+    if ( flipHorizontal ) this._mirrorX(transformed);
+    if ( flipVertical ) this._mirrorY(transformed);
+
+    // Next apply rotation
+    this._rotateEdges(direction, transformed);
+    return transformed;
   }
 
   /* -------------------------------------------- */
@@ -97,19 +124,38 @@ export default class Room {
   /**
    * Rotate the edges of the room data to form a rotated permutation
    * @param {string} direction          The desired direction of rotation
-   * @param {EdgeConstraints} edges     The existing edge constraints
-   * @returns {EdgeConstraints}         The rotated edge constraints
+   * @param {RoomData} data             A permutation of Room Data
    * @private
    */
-  _rotateEdges(direction, edges) {
+  _rotateEdges(direction, data) {
     const directions = Room.DIRECTIONS;
+    const edges = duplicate(data.edges);
     const rotations = directions.indexOf(direction);
-    const rotated = {};
-    for ( let [i, d] of directions.entries() ) {
-      const x = (i + rotations) % 4;
-      rotated[d] = edges[directions[x]];
+    if ( rotations === 0 ) return edges;
+
+    // Rotate once (90 degrees)
+    if ( rotations === 1 ) {
+      data.edges.n = edges.w.reverse();
+      data.edges.e = edges.n;
+      data.edges.s = edges.e.reverse();
+      data.edges.w = edges.s;
     }
-    return rotated;
+
+    // Rotate twice (180 degrees)
+    else if ( rotations === 2 ) {
+      data.edges.n = edges.s.reverse();
+      data.edges.e = edges.w.reverse();
+      data.edges.s = edges.n.reverse();
+      data.edges.w = edges.e.reverse();
+    }
+
+    // Rotate thrice (270 degrees)
+    else if ( rotations === 3 ) {
+      data.edges.n = edges.e;
+      data.edges.e = edges.s.reverse();
+      data.edges.s = edges.w;
+      data.edges.w = edges.n.reverse();
+    }
   }
 
   /* -------------------------------------------- */
@@ -127,13 +173,13 @@ export default class Room {
    * @param {RoomData} data       Original un-flipped room data
    * @returns {RoomData}          Horizontally flipped room data
    */
-  flipHorizontal(data) {
+  _mirrorX(data) {
     let edges = duplicate(data.edges);
-    let flipped = duplicate(data);
-    flipped.edges.e = edges.w;
-    flipped.edges.w = edges.e;
-    flipped.mirrorX = true;
-    return flipped;
+    data.edges.n = edges.n.reverse();
+    data.edges.e = edges.w;
+    data.edges.s = edges.s.reverse();
+    data.edges.w = edges.e;
+    data.mirrorX = !data.mirrorX;
   }
 
   /* -------------------------------------------- */
@@ -143,13 +189,13 @@ export default class Room {
    * @param {RoomData} data       Original un-flipped room data
    * @returns {RoomData}          Vertically flipped room data
    */
-  flipVertical(data) {
+  _mirrorY(data) {
     let edges = duplicate(data.edges);
-    let flipped = duplicate(data);
-    flipped.edges.n = edges.s;
-    flipped.edges.s = edges.n;
-    flipped.mirrorY = true;
-    return flipped;
+    data.edges.n = edges.s;
+    data.edges.e = edges.e.reverse();
+    data.edges.s = edges.n;
+    data.edges.w = edges.e.reverse();
+    data.mirrorY = !data.mirrorY;
   }
 
   /* -------------------------------------------- */
@@ -159,22 +205,16 @@ export default class Room {
    * @returns {RoomData[]}
    */
   getPermutations() {
-
-    // Generate all 4 rotations
-    const rotations = Room.DIRECTIONS.map(d => {
-      const p = this.rotate(d);
-      p.img = this.img;
-      p.mirrorX = false;
-      p.mirrorY = false;
-      return p;
-    });
-
-    // Generate horizontal and vertical flips
-    const horizontal = rotations.map(d => this.flipHorizontal(d));
-    const vertical = rotations.map(d => this.flipVertical(d));
-
-    // Return all permutations
-    return rotations.concat(horizontal).concat(vertical);
+    const permutations = [];
+    for ( let m of ["", "mirrorX", "mirrorY"] ) {
+      for ( let d of Room.DIRECTIONS ) {
+        const p = this.transform(d, m === "mirrorX", m === "mirrorY");
+        p.img = this.img;
+        p.room = this;
+        permutations.push(p);
+      }
+    }
+    return permutations;
   }
 
   /* -------------------------------------------- */
@@ -196,5 +236,19 @@ export default class Room {
       mirrorX: false,
       mirrorY: false
     }
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Return an array of the cardinal directions which this Room has open?
+   * @returns {string[]}
+   */
+  static getOpenDirections(data) {
+    const open = [];
+    for ( let [d, edges] of Object.entries(data.edges) ) {
+      if ( edges.some(e => !!e) ) open.push(d);
+    }
+    return open;
   }
 }
