@@ -109,6 +109,7 @@ export default class Room {
   transform(direction, flipHorizontal=false, flipVertical=false) {
     const transformed = duplicate(this.data);
     transformed.mirrorX = transformed.mirrorY = false;
+    transformed.rotation = 0;
 
     // First apply any mirroring
     if ( flipHorizontal ) this._mirrorX(transformed);
@@ -140,6 +141,7 @@ export default class Room {
       data.edges.e = edges.n;
       data.edges.s = edges.e.reverse();
       data.edges.w = edges.s;
+      data.rotation = 90;
     }
 
     // Rotate twice (180 degrees)
@@ -148,6 +150,7 @@ export default class Room {
       data.edges.e = edges.w.reverse();
       data.edges.s = edges.n.reverse();
       data.edges.w = edges.e.reverse();
+      data.rotation = 180;
     }
 
     // Rotate thrice (270 degrees)
@@ -156,8 +159,11 @@ export default class Room {
       data.edges.e = edges.s.reverse();
       data.edges.s = edges.w;
       data.edges.w = edges.n.reverse();
+      data.rotation = 270;
     }
   }
+
+  /* -------------------------------------------- */
 
   _rotateWalls(direction, data) {
     const directions = Room.DIRECTIONS;

@@ -136,14 +136,15 @@ export default class Generator {
   _try() {
 
     // Determine the next location to place
-    const [x, y] = this._getNextLocation();
+    const [x, y, type] = this._getNextLocation();
 
     // Get existing constraints for that location
     const constraints = this._getAdjacentConstraints(x, y);
 
     // Get candidate Rooms that can provide permutations
     const minOpen = !this.placements.length ? 9 : Object.values(constraints).flat().reduce((n, e) => (!!e ? n+1 : n), 0);
-    const rooms = this.tileset.findRooms({minOpen});
+    let rooms = [];
+    if ( type !== "blank" ) rooms = this.tileset.findRooms({minOpen});
 
     // Get the permutations which satisfy the constraints
     const permutations = this._getMatchingPermutations(rooms, constraints);
@@ -365,28 +366,32 @@ export default class Generator {
 
   /**
    * Determine the next tile location to try and place
-   * @returns {number[]}
+   * @returns {Array<(number|string)>}
    * @private
    */
   _getNextLocation() {
 
-    // Case 1: a brand new layout
+    // Case 1: initiate a brand new layout
     if ( !this.placements.length ) {
       const i1 = Math.floor(this.nRooms / 2);
-      return [i1, i1];
+      return [i1, i1, "initial"];
     }
 
-    // Case 2: required adjacent positions
+    // Case 2: populate adjacent positions
     const progress = this._getProgress();
     const required = Array.from(progress.required);
     if ( required.length ) {
-      return required[Math.floor(Math.random() * required.length)].split(".").map(Number);
+      const next = required[Math.floor(Math.random() * required.length)].split(".").map(Number);
+      next.push("adjacent");
+      return next;
     }
 
-    // Case 3: pick a random position which is not yet placed
+    // Case 3: populate blank tiles
     const incomplete = Array.from(progress.incomplete);
     if ( incomplete.length ) {
-      return incomplete[Math.floor(Math.random() * incomplete.length)].split(".").map(Number);
+      const next = incomplete[Math.floor(Math.random() * incomplete.length)].split(".").map(Number);
+      next.push("blank");
+      return next;
     }
     throw new Error("Failed to determine the next room location");
   }
@@ -431,8 +436,8 @@ export default class Generator {
         config.tiles.push(tileData);
 
         // I'm sure there is a fancier way to do this
-        if (d.rotation == undefined || d.rotation == "0") {
-          if (d.walls.n != undefined) {
+        if (d.rotation === undefined || d.rotation === "0") {
+          if (d.walls.n !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.n[w].c[0] += x * s;
               d.walls.n[w].c[1] += y * s;
@@ -442,8 +447,8 @@ export default class Generator {
             config.walls = config.walls.concat(d.walls.n);
           }
         }
-        else if (d.rotation == "90") {
-          if (d.walls.e != undefined) {
+        else if (d.rotation === "90") {
+          if (d.walls.e !== undefined) {
             for (let w = 0; w < d.walls.e.length; w++) {
               d.walls.e[w].c[0] += x * s;
               d.walls.e[w].c[1] += y * s;
@@ -453,24 +458,24 @@ export default class Generator {
             config.walls = config.walls.concat(d.walls.e);
           } 
         }
-        else if (d.rotation == "180") {
-          if (d.walls.s != undefined) {
+        else if (d.rotation === "180") {
+          if (d.walls.s !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.s[w].c[0] += x * s;
-              d.walls.s[w].c[1] += y * s;;
+              d.walls.s[w].c[1] += y * s;
               d.walls.s[w].c[2] += x * s;
-              d.walls.s[w].c[3] += y * s;;
+              d.walls.s[w].c[3] += y * s;
             }
             config.walls = config.walls.concat(d.walls.s);
           } 
         }
-        else if (d.rotation == "270") {
-          if (d.walls.w != undefined) {
+        else if (d.rotation === "270") {
+          if (d.walls.w !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.w[w].c[0] += x * s;
-              d.walls.w[w].c[1] += y * s;;
+              d.walls.w[w].c[1] += y * s;
               d.walls.w[w].c[2] += x * s;
-              d.walls.w[w].c[3] += y * s;;
+              d.walls.w[w].c[3] += y * s;
             }
             config.walls = config.walls.concat(d.walls.w);
           } 
