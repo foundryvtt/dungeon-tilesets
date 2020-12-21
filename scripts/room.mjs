@@ -116,6 +116,7 @@ export default class Room {
 
     // Next apply rotation
     this._rotateEdges(direction, transformed);
+    this._rotateWalls(direction, transformed);
     return transformed;
   }
 
@@ -158,10 +159,10 @@ export default class Room {
     }
   }
 
-  _rotateWalls(direction, walls) {
+  _rotateWalls(direction, data) {
     const directions = Room.DIRECTIONS;
     const rotations = directions.indexOf(direction);
-    const rotated = {};
+    const walls = duplicate(data.walls);
 
     for ( let [i, d] of directions.entries() ) {
       const x = (i + rotations) % 4;
@@ -191,9 +192,8 @@ export default class Room {
         }
       }
 
-      rotated[d] = rotatedWalls;
+      data.walls[d] = rotatedWalls;
     }
-    return rotated;
   }
 
   /* -------------------------------------------- */

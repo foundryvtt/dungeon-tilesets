@@ -431,7 +431,7 @@ export default class Generator {
         config.tiles.push(tileData);
 
         // I'm sure there is a fancier way to do this
-        if (d.rotation == "0") {
+        if (d.rotation == undefined || d.rotation == "0") {
           if (d.walls.n != undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.n[w].c[0] += x * s;
