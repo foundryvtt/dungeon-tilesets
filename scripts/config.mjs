@@ -12,7 +12,7 @@ export default class DungeonTilesetsConfig extends FormApplication {
             width: 500,
             height: 200,
             closeOnSubmit: false,
-            submitOnClose: true
+            submitOnClose: false
         });
     }
 
@@ -29,6 +29,7 @@ export default class DungeonTilesetsConfig extends FormApplication {
         await tileset.initialize();
         const generator = new Generator(tileset);
         const configuration = generator.generate({ size: data.size });
+        console.log(configuration);
         generator.commit(configuration);
     }
 }
