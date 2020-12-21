@@ -171,7 +171,60 @@ export default class Room {
     flipped.edges.e = edges.w;
     flipped.edges.w = edges.e;
     flipped.mirrorX = true;
+    flipped.walls = this._flipWallsHorizontally(flipped.walls);
     return flipped;
+  }
+
+  _flipWallsHorizontally(walls) {
+    let flippedWalls = [];
+
+    for (let wallIndex = 0; wallIndex < walls.length; wallIndex++) {
+      let wall = walls[wallIndex];
+      let flippedWall = duplicate(wall);
+      
+      let point1 = this._flipPointHorizontally(flippedWall.c[0], flippedWall.c[1]);
+      let point2 = this._flipPointHorizontally(flippedWall.c[2], flippedWall.c[3]);
+      flippedWall.c[0] = point1.x;
+      flippedWall.c[1] = point1.y;
+      flippedWall.c[2] = point2.x;
+      flippedWall.c[3] = point2.y;
+
+      flippedWalls.push(flippedWall);
+    }
+
+    return flippedWalls;
+  }
+
+  _flipWallsVertically(walls) {
+    let flippedWalls = [];
+
+    for (let wallIndex = 0; wallIndex < walls.length; wallIndex++) {
+      let wall = walls[wallIndex];
+      let flippedWall = duplicate(wall);
+      
+      let point1 = this._flipPointVertically(flippedWall.c[0], flippedWall.c[1]);
+      let point2 = this._flipPointVertically(flippedWall.c[2], flippedWall.c[3]);
+      flippedWall.c[0] = point1.x;
+      flippedWall.c[1] = point1.y;
+      flippedWall.c[2] = point2.x;
+      flippedWall.c[3] = point2.y;
+
+      flippedWalls.push(flippedWall);
+    }
+
+    return flippedWalls;
+  }
+
+   // X, Y -> 1800 (Max X) - X, Y
+   _flipPointHorizontally(x, y) {
+    // TODO: Don't hardcode the max
+    return { x: 1800 - x, y: y };
+  }
+
+  // X, Y -> X, 1800 (Max Y) - Y
+  _flipPointVertically(x, y) {
+    // TODO: Don't hardcode the max
+    return { x: x, y: 1800 - y };
   }
 
   /* -------------------------------------------- */
