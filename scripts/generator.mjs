@@ -434,9 +434,10 @@ export default class Generator {
           locked: true
         };
         config.tiles.push(tileData);
+        console.log(d);
 
         // I'm sure there is a fancier way to do this
-        if (d.rotation === undefined || d.rotation === "0") {
+        if (d.rotation === undefined || d.rotation === 0) {
           if (d.walls.n !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.n[w].c[0] += x * s;
@@ -446,8 +447,9 @@ export default class Generator {
             }
             config.walls = config.walls.concat(d.walls.n);
           }
+          config.walls = config.walls.concat(d.walls.n);
         }
-        else if (d.rotation === "90") {
+        else if (d.rotation === 90) {
           if (d.walls.e !== undefined) {
             for (let w = 0; w < d.walls.e.length; w++) {
               d.walls.e[w].c[0] += x * s;
@@ -458,7 +460,7 @@ export default class Generator {
             config.walls = config.walls.concat(d.walls.e);
           } 
         }
-        else if (d.rotation === "180") {
+        else if (d.rotation === 180) {
           if (d.walls.s !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.s[w].c[0] += x * s;
@@ -469,7 +471,7 @@ export default class Generator {
             config.walls = config.walls.concat(d.walls.s);
           } 
         }
-        else if (d.rotation === "270") {
+        else if (d.rotation === 270) {
           if (d.walls.w !== undefined) {
             for (let w = 0; w < d.walls.n.length; w++) {
               d.walls.w[w].c[0] += x * s;
