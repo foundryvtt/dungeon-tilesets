@@ -44,18 +44,20 @@ export default class Tileset {
   /**
    * Are there rooms that can fit?
    * @param options
-   * @param {number} [minOpen]      The minimum number of open edges
-   * @param {number} [maxOpen]      The maximum number of open edges
-   * @param {number} [centerOpen]   A minimum number of central openings the room must have
-   * @param {number} [cornerOpen]   A minimum number of corner openings the room must have
+   * @param {number} [minOpen]        The minimum number of open edges
+   * @param {number} [maxOpen]        The maximum number of open edges
+   * @param {boolean} [hasCenterOpen]  A minimum number of central openings the room must have
+   * @param {boolean} [hasCornerOpen]  A minimum number of corner openings the room must have
    * @returns {Room[]}
    */
-  findRooms({minOpen, maxOpen, centerOpen, cornerOpen}) {
+  findRooms({minOpen, maxOpen, hasCenterOpen, hasCornerOpen}) {
     const matched = [];
     for ( let r of this.rooms ) {
       const nOpen = r.nOpen;
       if ( Number.isNumeric(minOpen) && (nOpen < minOpen) ) continue;
       if ( Number.isNumeric(maxOpen) && (nOpen > maxOpen) ) continue;
+      if ( (hasCenterOpen !== undefined) && (hasCenterOpen !== r.hasCenterOpen) ) continue;
+      if ( (hasCornerOpen !== undefined) && (hasCornerOpen !== r.hasCornerOpen) ) continue;
       matched.push(r);
     }
     return matched;
