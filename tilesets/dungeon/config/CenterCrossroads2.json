@@ -195,8 +195,9 @@
       ],
       "move": 1,
       "sense": 1,
-      "door": 0,
-      "ds": 0
+      "door": 1,
+      "ds": 0,
+      "dir": 0
     },
     {
       "_id": "IuMaQ2rzNGc24ptI",
@@ -237,8 +238,9 @@
       ],
       "move": 1,
       "sense": 1,
-      "door": 0,
-      "ds": 0
+      "door": 1,
+      "ds": 0,
+      "dir": 0
     },
     {
       "_id": "Z3eSSX0g7nt7c5ez",
@@ -391,8 +393,9 @@
       ],
       "move": 1,
       "sense": 1,
-      "door": 0,
-      "ds": 0
+      "door": 1,
+      "ds": 0,
+      "dir": 0
     },
     {
       "_id": "YbAmTghL4HiIz7g0",
