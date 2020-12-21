@@ -8,27 +8,14 @@
       "c": [
         0,
         0,
-        1800,
+        600,
         0
       ],
       "move": 1,
       "sense": 1,
       "door": 0,
-      "ds": 0
-    },
-    {
-      "_id": "Dic5gUZmIi293vn2",
-      "flags": {},
-      "c": [
-        1800,
-        0,
-        1800,
-        600
-      ],
-      "move": 1,
-      "sense": 1,
-      "door": 0,
-      "ds": 0
+      "ds": 0,
+      "locked": false
     },
     {
       "_id": "1Q46VeTCJuhpqeCl",

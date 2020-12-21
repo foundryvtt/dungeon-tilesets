@@ -384,16 +384,48 @@ export default class Generator {
 
         // I'm sure there is a fancier way to do this
         if (d.rotation == "0") {
-          config.walls = d.walls.n;
+          if (d.walls.n != undefined) {
+            for (let w = 0; w < d.walls.n.length; w++) {
+              d.walls.n[w].c[0] += x * s;
+              d.walls.n[w].c[1] += y * s;
+              d.walls.n[w].c[2] += x * s;
+              d.walls.n[w].c[3] += y * s;
+            }
+            config.walls = config.walls.concat(d.walls.n);
+          }
         }
         else if (d.rotation == "90") {
-          config.walls = d.walls.e;
+          if (d.walls.e != undefined) {
+            for (let w = 0; w < d.walls.e.length; w++) {
+              d.walls.e[w].c[0] += x * s;
+              d.walls.e[w].c[1] += y * s;
+              d.walls.e[w].c[2] += x * s;
+              d.walls.e[w].c[3] += y * s;
+            }
+            config.walls = config.walls.concat(d.walls.e);
+          } 
         }
         else if (d.rotation == "180") {
-          config.walls = d.walls.s;
+          if (d.walls.s != undefined) {
+            for (let w = 0; w < d.walls.n.length; w++) {
+              d.walls.s[w].c[0] += x * s;
+              d.walls.s[w].c[1] += y * s;;
+              d.walls.s[w].c[2] += x * s;
+              d.walls.s[w].c[3] += y * s;;
+            }
+            config.walls = config.walls.concat(d.walls.s);
+          } 
         }
         else if (d.rotation == "270") {
-          config.walls = d.walls.w;
+          if (d.walls.w != undefined) {
+            for (let w = 0; w < d.walls.n.length; w++) {
+              d.walls.w[w].c[0] += x * s;
+              d.walls.w[w].c[1] += y * s;;
+              d.walls.w[w].c[2] += x * s;
+              d.walls.w[w].c[3] += y * s;;
+            }
+            config.walls = config.walls.concat(d.walls.w);
+          } 
         }
       }
     }
