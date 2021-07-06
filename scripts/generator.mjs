@@ -8,9 +8,9 @@ import Room from "./room.mjs";
  * @param {number} [options.roomSize=9]
  */
 export default class Generator {
-  constructor(tileset, {gridSize=200, roomSize=9}={}) {
+  constructor(tileset, {gridSize=200, gridsInRoom=9}={}) {
     this.gridSize = gridSize;
-    this.roomSize = roomSize;
+    this.gridsInRoom = gridsInRoom;
     this.tileset = tileset;
     this._configure();
   }
@@ -19,7 +19,7 @@ export default class Generator {
    * The maximum placement attempts which can be tried before a layout is declared invalid
    * @type {number}
    */
-  static MAX_ALLOWED_ATTEMPTS = 500;
+  static MAX_ALLOWED_ATTEMPTS = 100;
 
   /* -------------------------------------------- */
 
@@ -27,10 +27,17 @@ export default class Generator {
    * Get rid of everything and reset back to blank canvas
    */
   clear() {
-    return canvas.scene.update({
-      tiles: [],
-      walls: []
-    });
+    // noinspection JSUnresolvedFunction
+    canvas.scene.deleteEmbeddedDocuments("Wall", [], {deleteAll: true});
+
+    // noinspection JSUnresolvedFunction
+    canvas.scene.deleteEmbeddedDocuments("Tile", [], {deleteAll: true});
+
+    // noinspection JSUnresolvedFunction
+    // return canvas.scene.update({
+    //   tiles: [],
+    //   walls: []
+    // });
   }
 
   /* -------------------------------------------- */
@@ -52,6 +59,9 @@ export default class Generator {
    * @return {object} configuration
    */
   generate(options={}) {
+
+    // Clear any existing generations
+    this.clear();
 
     // Configure the generator
     this._configure(options);
@@ -75,7 +85,9 @@ export default class Generator {
 
     // Determine the layout size
     this.size = size;
-    this.nRooms = {
+    this.numberOfRoomsWide = {
+      single: 1,
+      tiny: 2,
       small: 3,
       medium: 5,
       large: 7
@@ -83,7 +95,7 @@ export default class Generator {
 
     // Generate the placeholder layout
     this.placements = [];
-    const nr = Array.fromRange(this.nRooms);
+    const nr = Array.fromRange(this.numberOfRoomsWide);
     this.layout = nr.map(r => nr.map(i => null));
 
     // Internal progress trackers
@@ -99,7 +111,7 @@ export default class Generator {
    * @private
    */
   _getCanvasSize(size) {
-    return this.nRooms * this.roomSize * this.gridSize;
+    return this.numberOfRoomsWide * this.gridsInRoom * this.gridSize;
   }
 
   /* -------------------------------------------- */
@@ -109,6 +121,7 @@ export default class Generator {
    * @private
    */
   _generate() {
+    console.log("Initiating generation")
     const max = Generator.MAX_ALLOWED_ATTEMPTS;
     let isComplete = false;
     while ( !isComplete && (this._attempts < max) ) {
@@ -116,7 +129,7 @@ export default class Generator {
         this.attemptsCurrent++;
         this._attempts++;
         this._try();
-        isComplete = this.placements.length === this.roomSize;
+        isComplete = this.placements.length === (this.layout.length * this.layout.length);
       } catch(err) {
         this._backtrack();
       }
@@ -134,7 +147,6 @@ export default class Generator {
    * @private
    */
   _try() {
-
     // Determine the next location to place
     const [x, y, type] = this._getNextLocation();
 
@@ -142,7 +154,7 @@ export default class Generator {
     const constraints = this._getAdjacentConstraints(x, y);
 
     // Get candidate Rooms that can provide permutations
-    const minOpen = !this.placements.length ? 9 : Object.values(constraints).flat().reduce((n, e) => (!!e ? n+1 : n), 0);
+    const minOpen = !this.placements.length ? (this.layout.length * this.layout.length) : Object.values(constraints).flat().reduce((n, e) => (!!e ? n+1 : n), 0);
     let rooms = [];
     if ( type !== "blank" ) rooms = this.tileset.findRooms({minOpen});
 
@@ -172,7 +184,7 @@ export default class Generator {
     }
     const [x, y] = this.placements.pop();
     this.layout[x][y] = null;
-    this.attemptsCurrent = 0;
+    this.attemptsCurrent = this.attemptsCurrent - 1;
   }
 
   /* -------------------------------------------- */
@@ -209,14 +221,14 @@ export default class Generator {
         let x1 = x0 + o[0];
         let y1 = y0 + o[1];
         const pos = [x1,y1].join(".");
-        if ( x1.between(0, this.nRooms-1) && y1.between(0, this.nRooms-1) && !completed.has(pos) ) {
+        if ( x1.between(0, this.numberOfRoomsWide-1) && y1.between(0, this.numberOfRoomsWide-1) && !completed.has(pos) ) {
           required.add(pos);
         }
       }
     }
 
     // Record incomplete locations
-    const nr = Array.fromRange(this.nRooms);
+    const nr = Array.fromRange(this.numberOfRoomsWide);
     for ( let x of nr ) {
       for ( let y of nr ) {
         const pos = [x,y].join(".");
@@ -249,8 +261,8 @@ export default class Generator {
   getAdjacent(x, y) {
     return {
       n: y === 0 ? false : (this.layout[x][y-1] ?? null),
-      e: x === (this.nRooms-1) ? false : (this.layout[x+1][y] ?? null),
-      s: y === (this.nRooms-1) ? false : (this.layout[x][y+1] ?? null),
+      e: x === (this.numberOfRoomsWide-1) ? false : (this.layout[x+1][y] ?? null),
+      s: y === (this.numberOfRoomsWide-1) ? false : (this.layout[x][y+1] ?? null),
       w: x === 0 ? false : (this.layout[x-1][y] ?? null)
     };
   }
@@ -288,15 +300,15 @@ export default class Generator {
   _getAdjacentEdges(direction, adjacent) {
 
     // Case 1: adjacent is an outer edge, all edges should be closed (false)
-    if ( adjacent === false ) return Array.fromRange(this.roomSize).map(n => false);
+    if ( adjacent === false ) return Array.fromRange(this.gridsInRoom).map(n => false);
 
     // Case 2: adjacent is interior blank, edges can be anything (null)
-    if ( adjacent === null ) return Array.fromRange(this.roomSize).map(n => null);
+    if ( adjacent === null ) return Array.fromRange(this.gridsInRoom).map(n => null);
 
     // Case 3: adjacent is interior data with known edges
     const idx = { n: "s", e: "w", s: "n", w: "e" }[direction]; // reverse the direction
     const edges = duplicate(adjacent.edges[idx]);
-    return edges ?? Array.fromRange(this.roomSize).map(n => null);
+    return edges ?? Array.fromRange(this.gridsInRoom).map(n => null);
   }
 
   /* -------------------------------------------- */
@@ -373,7 +385,7 @@ export default class Generator {
 
     // Case 1: initiate a brand new layout
     if ( !this.placements.length ) {
-      const i1 = Math.floor(this.nRooms / 2);
+      const i1 = Math.floor(this.numberOfRoomsWide / 2);
       return [i1, i1, "initial"];
     }
 
@@ -414,14 +426,16 @@ export default class Generator {
       padding: 0,
       backgroundColor: "#000000",
       tiles: [],
-      walls: []
+      walls: [],
+      lights: []
     };
 
+    console.log(this.layout);
     // Get tile configuration
     for ( let [x, col] of this.layout.entries() ) {
       for ( let [y, d] of col.entries() ) {
         if ( !d?.img ) continue;
-        const s = this.roomSize * this.gridSize;
+        const s = this.gridsInRoom * this.gridSize;
         const tileData = {
           x: x * s,
           y: y * s,
@@ -473,7 +487,7 @@ export default class Generator {
         }
         else if (d.rotation === 270) {
           if (d.walls.w !== undefined) {
-            for (let w = 0; w < d.walls.n.length; w++) {
+            for (let w = 0; w < d.walls.w.length; w++) {
               d.walls.w[w].c[0] += x * s;
               d.walls.w[w].c[1] += y * s;
               d.walls.w[w].c[2] += x * s;
@@ -485,7 +499,21 @@ export default class Generator {
       }
     }
 
+    config.walls.forEach(x => x._id = foundry.utils.randomID(16));
+    config.lights.forEach(x => x._id = foundry.utils.randomID(16));
+
     // Return the exported configuration
     return config;
+  }
+
+  _rotateElementPoints(container, x, y, s) {
+    if (container == undefined) return [];
+      for (let index = 0; index < container.length; index++) {
+        container[index].c[0] += x * s;
+        container[index].c[1] += y * s;
+        container[index].c[2] += x * s;
+        container[index].c[3] += y * s;
+      }
+      return container;
   }
 }

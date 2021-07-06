@@ -224,6 +224,7 @@ export default class Room {
     data.edges.s = edges.s.reverse();
     data.edges.w = edges.e;
     data.mirrorX = !data.mirrorX;
+    data.walls = this._flipWallsHorizontally(duplicate(data.walls));
   }
 
   _flipWallsHorizontally(walls) {
@@ -292,6 +293,7 @@ export default class Room {
     data.edges.s = edges.n;
     data.edges.w = edges.e.reverse();
     data.mirrorY = !data.mirrorY;
+    data.walls = this._flipWallsVertically(duplicate(data.walls));
   }
 
   /* -------------------------------------------- */

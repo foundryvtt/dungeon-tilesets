@@ -25,11 +25,11 @@ export default class DungeonTilesetsConfig extends FormApplication {
      */
     async _updateObject(event, data) {
         console.log(data);
-        const tileset = new Tileset("dungeon");
+        const tileset = new Tileset(data.tileset);
         await tileset.initialize();
         const generator = new Generator(tileset);
         const configuration = generator.generate({ size: data.size });
         console.log(configuration);
-        generator.commit(configuration);
+        await generator.commit(configuration);
     }
 }
