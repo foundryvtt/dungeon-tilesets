@@ -61,6 +61,10 @@ export default class Room {
     return `${this.tileset.path}/tiles/${this.name}.webp`;
   }
 
+  get overheadImg() {
+    return `${this.tileset.path}/tiles/${this.name}_Foreground.webp`;
+  }
+
   /**
    * The number of open edges that a Room has
    * @type {number}
@@ -118,6 +122,7 @@ export default class Room {
     // Next apply rotation
     this._rotateEdges(direction, transformed);
     this._rotateWalls(direction, transformed);
+    this._rotateLights(direction, transformed);
     return transformed;
   }
 
@@ -204,6 +209,42 @@ export default class Room {
 
   /* -------------------------------------------- */
 
+  _rotateLights(direction, data) {
+    const directions = Room.DIRECTIONS;
+    const rotations = directions.indexOf(direction);
+    const lights = duplicate(data.lights);
+
+    for ( let [i, d] of directions.entries() ) {
+      const x = (i + rotations) % 4;
+      let rotationIndex = directions.indexOf(d);
+
+      let rotatedLights = [];
+
+      // Already good to go
+      if (rotationIndex == 0) {
+        rotatedLights = lights;
+      }
+      else {
+        for (let index = 0; index < lights.length; index++) {
+          let light = lights[index];
+          let rotatedLight = duplicate(light);
+
+          for (let numOfRotations = 0; numOfRotations < rotationIndex; numOfRotations++) {
+            let point = this._rotatePointClockwise(rotatedLight.x, rotatedLight.y);
+            rotatedLight.x = point.x;
+            rotatedLight.y = point.y;
+          }
+
+          rotatedLights.push(rotatedLight);
+        }
+      }
+
+      data.lights[d] = rotatedLights;
+    }
+  }
+
+  /* -------------------------------------------- */
+
   // X, Y -> 1800 (Max Y) - Y, X
   _rotatePointClockwise(x, y) {
     // TODO: Don't hardcode the max
@@ -225,6 +266,7 @@ export default class Room {
     data.edges.w = edges.e;
     data.mirrorX = !data.mirrorX;
     data.walls = this._flipWallsHorizontally(duplicate(data.walls));
+    data.lights = this._flipLightsHoriztonally(duplicate(data.lights));
   }
 
   _flipWallsHorizontally(walls) {
@@ -247,6 +289,41 @@ export default class Room {
     return flippedWalls;
   }
 
+  _flipLightsHoriztonally(lights) {
+    let flippedLights = [];
+
+    for (let i = 0; i < lights.length; i++) {
+      let light = lights[i];
+      let flippedLight = duplicate(light);
+
+      let point = this._flipPointHorizontally(flippedLight.x, flippedLight.y);
+      flippedLight.x = point.x;
+      flippedLight.y = point.y;
+
+      flippedLights.push(flippedLight);
+    }
+
+    return flippedLights;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Generate a permutation of the Room Data by flipping its data vertically
+   * @param {RoomData} data       Original un-flipped room data
+   * @returns {RoomData}          Vertically flipped room data
+   */
+  _mirrorY(data) {
+    let edges = duplicate(data.edges);
+    data.edges.n = edges.s;
+    data.edges.e = edges.e.reverse();
+    data.edges.s = edges.n;
+    data.edges.w = edges.e.reverse();
+    data.mirrorY = !data.mirrorY;
+    data.walls = this._flipWallsVertically(duplicate(data.walls));
+    data.lights = this._flipLightsVertically(duplicate(data.lights));
+  }
+
   _flipWallsVertically(walls) {
     let flippedWalls = [];
 
@@ -267,6 +344,23 @@ export default class Room {
     return flippedWalls;
   }
 
+  _flipLightsVertically(lights) {
+    let flippedLights = [];
+
+    for (let i = 0; i < lights.length; i++) {
+      let light = lights[i];
+      let flippedLight = duplicate(light);
+
+      let point = this._flipPointVertically(flippedLight.x, flippedLight.y);
+      flippedLight.x = point.x;
+      flippedLight.y = point.y;
+
+      flippedLights.push(flippedLight);
+    }
+
+    return flippedLights;
+  }
+
    // X, Y -> 1800 (Max X) - X, Y
    _flipPointHorizontally(x, y) {
     // TODO: Don't hardcode the max
@@ -282,23 +376,6 @@ export default class Room {
   /* -------------------------------------------- */
 
   /**
-   * Generate a permutation of the Room Data by flipping its data vertically
-   * @param {RoomData} data       Original un-flipped room data
-   * @returns {RoomData}          Vertically flipped room data
-   */
-  _mirrorY(data) {
-    let edges = duplicate(data.edges);
-    data.edges.n = edges.s;
-    data.edges.e = edges.e.reverse();
-    data.edges.s = edges.n;
-    data.edges.w = edges.e.reverse();
-    data.mirrorY = !data.mirrorY;
-    data.walls = this._flipWallsVertically(duplicate(data.walls));
-  }
-
-  /* -------------------------------------------- */
-
-  /**
    * Prepare an array of 12 permutations which can be supported for each Room
    * @returns {RoomData[]}
    */
@@ -308,6 +385,7 @@ export default class Room {
       for ( let d of Room.DIRECTIONS ) {
         const p = this.transform(d, m === "mirrorX", m === "mirrorY");
         p.img = this.img;
+        p.overheadImg = this.overheadImg;
         p.room = this;
         permutations.push(p);
       }
@@ -323,6 +401,7 @@ export default class Room {
       name: "Blank",
       size: 9,
       walls: [],
+      lights: [],
       edges: {
         n: edges,
         e: edges,

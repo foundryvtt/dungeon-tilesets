@@ -34,10 +34,7 @@ export default class Generator {
     canvas.scene.deleteEmbeddedDocuments("Tile", [], {deleteAll: true});
 
     // noinspection JSUnresolvedFunction
-    // return canvas.scene.update({
-    //   tiles: [],
-    //   walls: []
-    // });
+    canvas.scene.deleteEmbeddedDocuments("Light", [], {deleteAll: true});
   }
 
   /* -------------------------------------------- */
@@ -448,53 +445,43 @@ export default class Generator {
           locked: true
         };
         config.tiles.push(tileData);
+
+        const overheadTileData = {
+          x: x * s,
+          y: y * s,
+          width: s,
+          height: s,
+          rotation: d.rotation,
+          mirrorX: d.mirrorX,
+          mirrorY: d.mirrorY,
+          img: d.overheadImg,
+          overhead: true,
+          occlusion: {
+            alpha: 0,
+            mode: 2
+          },
+          locked: true
+        };
+        config.tiles.push(overheadTileData);
+
         console.log(d);
 
         // I'm sure there is a fancier way to do this
         if (d.rotation === undefined || d.rotation === 0) {
-          if (d.walls.n !== undefined) {
-            for (let w = 0; w < d.walls.n.length; w++) {
-              d.walls.n[w].c[0] += x * s;
-              d.walls.n[w].c[1] += y * s;
-              d.walls.n[w].c[2] += x * s;
-              d.walls.n[w].c[3] += y * s;
-            }
-            config.walls = config.walls.concat(d.walls.n);
-          }
-          config.walls = config.walls.concat(d.walls.n);
+          config.walls = config.walls.concat(this._rotateWallPoints(d.walls.n, x, y, s));
+          config.lights = config.lights.concat(this._rotateLightPoints(d.lights.n, x, y, s));
         }
         else if (d.rotation === 90) {
-          if (d.walls.e !== undefined) {
-            for (let w = 0; w < d.walls.e.length; w++) {
-              d.walls.e[w].c[0] += x * s;
-              d.walls.e[w].c[1] += y * s;
-              d.walls.e[w].c[2] += x * s;
-              d.walls.e[w].c[3] += y * s;
-            }
-            config.walls = config.walls.concat(d.walls.e);
-          } 
+          config.walls = config.walls.concat(this._rotateWallPoints(d.walls.e, x, y, s));
+          config.lights = config.lights.concat(this._rotateLightPoints(d.lights.e, x, y, s));
         }
         else if (d.rotation === 180) {
-          if (d.walls.s !== undefined) {
-            for (let w = 0; w < d.walls.n.length; w++) {
-              d.walls.s[w].c[0] += x * s;
-              d.walls.s[w].c[1] += y * s;
-              d.walls.s[w].c[2] += x * s;
-              d.walls.s[w].c[3] += y * s;
-            }
-            config.walls = config.walls.concat(d.walls.s);
-          } 
+          config.walls = config.walls.concat(this._rotateWallPoints(d.walls.s, x, y, s));
+          config.lights = config.lights.concat(this._rotateLightPoints(d.lights.s, x, y, s));
         }
         else if (d.rotation === 270) {
-          if (d.walls.w !== undefined) {
-            for (let w = 0; w < d.walls.w.length; w++) {
-              d.walls.w[w].c[0] += x * s;
-              d.walls.w[w].c[1] += y * s;
-              d.walls.w[w].c[2] += x * s;
-              d.walls.w[w].c[3] += y * s;
-            }
-            config.walls = config.walls.concat(d.walls.w);
-          } 
+          config.walls = config.walls.concat(this._rotateWallPoints(d.walls.w, x, y, s));
+          config.lights = config.lights.concat(this._rotateLightPoints(d.lights.w, x, y, s));
         }
       }
     }
@@ -506,7 +493,7 @@ export default class Generator {
     return config;
   }
 
-  _rotateElementPoints(container, x, y, s) {
+  _rotateWallPoints(container, x, y, s) {
     if (container == undefined) return [];
       for (let index = 0; index < container.length; index++) {
         container[index].c[0] += x * s;
@@ -515,5 +502,14 @@ export default class Generator {
         container[index].c[3] += y * s;
       }
       return container;
+  }
+
+  _rotateLightPoints(container, x, y, s) {
+    if (container == undefined) return [];
+    for (let index = 0; index < container.length; index++) {
+      container[index].x += x * s;
+      container[index].y += y * s;
+    }
+    return container;
   }
 }
